@@ -23,8 +23,8 @@ int main(void)
     hero_rect.h /= 10;
     hero_rect.x = WINDOW_WIDTH / 2;
     hero_rect.y = WINDOW_HEIGHT / 2;
-    int hero_x_vel = SPEED;
-    int hero_y_vel = SPEED;
+    int hero_x_vel = 0;
+    int hero_y_vel = 0;
 
     bool move_up, move_down, move_right, move_left;
     move_up = move_down = move_right = move_left = false;
@@ -163,9 +163,19 @@ int main(void)
         hero_rect.y += hero_y_vel / 60;
 
         SDL_RenderClear(rend);
+        /* Check where player is in relation to the enemy, and change enemy velocity accordingly */
+        for (int i = 0; i < NUM_ENEMIES; i++) {
+            if (enemy_array[i]->x < hero_rect.x)
+                enemy_array[i]->x += SPEED / 100;
+            else
+                enemy_array[i]->x -= SPEED / 100;
+            if (enemy_array[i]->y < hero_rect.y)
+                enemy_array[i]->y += SPEED / 100;
+            else
+                enemy_array[i]->y -= SPEED / 100;
 
-        for (int i = 0; i < NUM_ENEMIES; i++)
             SDL_RenderCopy(rend, enemy_tex, NULL, enemy_array[i]);
+        }
 
         SDL_RenderCopy(rend, hero_tex, NULL, &hero_rect);
         SDL_RenderPresent(rend);
