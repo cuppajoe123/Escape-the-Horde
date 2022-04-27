@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include <stdbool.h>
 #include "graphics.h"
 #include "leader_board.h"
@@ -30,12 +31,37 @@ int main(void)
     
     bool close_requested = false;
 
+    /* create enemies */
+    SDL_Texture *enemy_tex = make_texture_img("resources/enemy.jpg");
+    SDL_Rect **enemy_array = malloc(NUM_ENEMIES * sizeof(SDL_Rect *));
+    if (!enemy_array) {
+        printf("Ran out of memory\n");
+        exit(-1);
+    }
+    srand(time(0));
+    for (int i = 0; i < NUM_ENEMIES; i++) {
+        enemy_array[i] = malloc(sizeof(SDL_Rect));
+        if (!enemy_array[i]) {
+            printf("Ran out of memory\n");
+            exit(-1);
+        }
+        SDL_QueryTexture(enemy_tex, NULL, NULL, &enemy_array[i]->w, &enemy_array[i]->h);
+        enemy_array[i]->w /= 18;
+        enemy_array[i]->h /= 18;
+        enemy_array[i]->x = rand() % WINDOW_WIDTH;
+        enemy_array[i]->y = rand() % WINDOW_HEIGHT;
+
+    }
+
     // start screen loop
     if (start_screen() == 1) {
         TTF_CloseFont(font);
         SDL_DestroyTexture(hero_tex);
         SDL_DestroyRenderer(rend);
         SDL_DestroyWindow(win);
+        for (int i = 0; i < NUM_ENEMIES; i++)
+            free(enemy_array[i]);
+        free(enemy_array);
         TTF_Quit();
         return 0;
     }
@@ -46,6 +72,9 @@ int main(void)
         SDL_DestroyTexture(hero_tex);
         SDL_DestroyRenderer(rend);
         SDL_DestroyWindow(win);
+        for (int i = 0; i < NUM_ENEMIES; i++)
+            free(enemy_array[i]);
+        free(enemy_array);
         TTF_Quit();
         return 0;
     }
@@ -59,6 +88,9 @@ int main(void)
                     SDL_DestroyTexture(hero_tex);
                     SDL_DestroyRenderer(rend);
                     SDL_DestroyWindow(win);
+                    for (int i = 0; i < NUM_ENEMIES; i++)
+                        free(enemy_array[i]);
+                    free(enemy_array);
                     TTF_Quit();
                     SDL_Quit();
                     return 0;
@@ -132,18 +164,23 @@ int main(void)
 
         SDL_RenderClear(rend);
 
+        for (int i = 0; i < NUM_ENEMIES; i++)
+            SDL_RenderCopy(rend, enemy_tex, NULL, enemy_array[i]);
+
         SDL_RenderCopy(rend, hero_tex, NULL, &hero_rect);
         SDL_RenderPresent(rend);
 
         SDL_Delay(1000/60);
     }
 
-
     if (leader_board_screen() == 1) {
         TTF_CloseFont(font);
         SDL_DestroyTexture(hero_tex);
         SDL_DestroyRenderer(rend);
         SDL_DestroyWindow(win);
+        for (int i = 0; i < NUM_ENEMIES; i++)
+            free(enemy_array[i]);
+        free(enemy_array);
         TTF_Quit();
         SDL_Quit();
         return 0;
@@ -154,13 +191,10 @@ int main(void)
     SDL_DestroyTexture(hero_tex);
     SDL_DestroyRenderer(rend);
     SDL_DestroyWindow(win);
+    for (int i = 0; i < NUM_ENEMIES; i++)
+        free(enemy_array[i]);
+    free(enemy_array);
     TTF_Quit();
     SDL_Quit();
     return 0;
 }
-
-
-
-
-
-
