@@ -12,6 +12,12 @@
 #include "graphics.h"
 #include "leader_board.h"
 
+struct enemy {
+    SDL_Rect rect;
+    int x_vel;
+    int y_vel;
+};
+
 int main(void)
 {
     init_graphics();
@@ -33,23 +39,25 @@ int main(void)
 
     /* create enemies */
     SDL_Texture *enemy_tex = make_texture_img("resources/enemy.jpg");
-    SDL_Rect **enemy_array = malloc(NUM_ENEMIES * sizeof(SDL_Rect *));
+    struct enemy **enemy_array = malloc(NUM_ENEMIES * sizeof(struct enemy *));
     if (!enemy_array) {
         printf("Ran out of memory\n");
         exit(-1);
     }
     srand(time(0));
     for (int i = 0; i < NUM_ENEMIES; i++) {
-        enemy_array[i] = malloc(sizeof(SDL_Rect));
+        enemy_array[i] = malloc(sizeof(struct enemy));
         if (!enemy_array[i]) {
             printf("Ran out of memory\n");
             exit(-1);
         }
-        SDL_QueryTexture(enemy_tex, NULL, NULL, &enemy_array[i]->w, &enemy_array[i]->h);
-        enemy_array[i]->w /= 18;
-        enemy_array[i]->h /= 18;
-        enemy_array[i]->x = rand() % WINDOW_WIDTH;
-        enemy_array[i]->y = rand() % WINDOW_HEIGHT;
+        SDL_QueryTexture(enemy_tex, NULL, NULL, &enemy_array[i]->rect.w, &enemy_array[i]->rect.h);
+        enemy_array[i]->rect.w /= 18;
+        enemy_array[i]->rect.h /= 18;
+        enemy_array[i]->rect.x = rand() % WINDOW_WIDTH;
+        enemy_array[i]->rect.y = rand() % WINDOW_HEIGHT;
+        enemy_array[i]->x_vel = SPEED / 100;
+        enemy_array[i]->y_vel = SPEED / 100;
 
     }
 
@@ -165,16 +173,43 @@ int main(void)
         SDL_RenderClear(rend);
         /* Check where player is in relation to the enemy, and change enemy velocity accordingly */
         for (int i = 0; i < NUM_ENEMIES; i++) {
-            if (enemy_array[i]->x < hero_rect.x)
-                enemy_array[i]->x += SPEED / 100;
+            if (enemy_array[i]->rect.x < hero_rect.x)
+                enemy_array[i]->x_vel = SPEED / 100;
             else
-                enemy_array[i]->x -= SPEED / 100;
-            if (enemy_array[i]->y < hero_rect.y)
-                enemy_array[i]->y += SPEED / 100;
+                enemy_array[i]->x_vel = -SPEED / 100;
+            if (enemy_array[i]->rect.y < hero_rect.y)
+                enemy_array[i]->y_vel = SPEED / 100;
             else
-                enemy_array[i]->y -= SPEED / 100;
+                enemy_array[i]->y_vel = -SPEED / 100;
 
-            SDL_RenderCopy(rend, enemy_tex, NULL, enemy_array[i]);
+            /*
+            for (int j = 0; j < NUM_ENEMIES; j++) {
+                if ((enemy_array[i]->rect.x >= enemy_array[j]->rect.x - enemy_array[j]->rect.w/2)
+                    && (enemy_array[i]->rect.x <= enemy_array[j]->rect.x + enemy_array[j]->rect.w/2))
+                    enemy_array[i]->x_vel *= -1;
+                if ((enemy_array[i]->rect.y >= enemy_array[j]->rect.y - enemy_array[j]->rect.h/2)
+                    && (enemy_array[i]->rect.y <= enemy_array[j]->rect.y + enemy_array[j]->rect.h/2))
+                    enemy_array[i]->y_vel *= -1;
+            }
+            */
+
+            /*
+            for (int j = 0; j < NUM_ENEMIES; j++) {
+                if (SDL_HasIntersection(&enemy_array[i]->rect, &enemy_array[j]->rect)) {
+                    enemy_array[i]->x_vel *= -1;
+                    enemy_array[i]->y_vel *= -1;
+                }
+            }
+            */
+            /* check for collision with player */
+            if (SDL_HasIntersection(&enemy_array[i]->rect, &hero_rect)) {
+                enemy_array[i]->x_vel *= -1;
+                enemy_array[i]->y_vel *= -1;
+            }
+            enemy_array[i]->rect.x += enemy_array[i]->x_vel;
+            enemy_array[i]->rect.y += enemy_array[i]->y_vel;
+
+            SDL_RenderCopy(rend, enemy_tex, NULL, &enemy_array[i]->rect);
         }
 
         SDL_RenderCopy(rend, hero_tex, NULL, &hero_rect);
