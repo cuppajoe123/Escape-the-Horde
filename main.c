@@ -26,21 +26,28 @@ int main(void)
 {
     init_graphics();
 
-    SDL_Texture *hero_tex = make_texture_img("resources/hero.png");
-    SDL_Rect hero_rect;
-    SDL_QueryTexture(hero_tex, NULL, NULL, &hero_rect.w, &hero_rect.h);
-    hero_rect.w /= 10;
-    hero_rect.h /= 10;
-    hero_rect.x = WINDOW_WIDTH / 2;
-    hero_rect.y = WINDOW_HEIGHT / 2;
-    int hero_x_vel = 0;
-    int hero_y_vel = 0;
+    SDL_Texture *player_tex = make_texture_img("resources/player.png");
+    SDL_Rect player_rect;
+    // prev_score_int is used to check if the score_int changed in a given frame
+    long score_int = 0;
+    long prev_score_int = 0;
+    
+    SDL_QueryTexture(player_tex, NULL, NULL, &player_rect.w, &player_rect.h);
+    player_rect.w /= 10;
+    player_rect.h /= 10;
+    player_rect.x = WINDOW_WIDTH / 2;
+    player_rect.y = WINDOW_HEIGHT / 2;
+    int player_x_vel = 0;
+    int player_y_vel = 0;
 
     bool move_up, move_down, move_right, move_left;
     move_up = move_down = move_right = move_left = false;
     
     bool close_requested = false;
 
+    /* create scoreboard */
+    SDL_Texture *score_tex = make_texture_str("0");
+    SDL_Rect score_rect = make_textbox(score_tex, 0, 0, 1, 0x0);
     /* create enemies */
     SDL_Texture *enemy_tex = make_texture_img("resources/enemy.jpg");
     struct enemy **enemy_array = malloc(NUM_ENEMIES * sizeof(struct enemy *));
@@ -71,12 +78,16 @@ int main(void)
     // start screen loop
     if (start_screen() == 1) {
         TTF_CloseFont(font);
-        SDL_DestroyTexture(hero_tex);
+        SDL_DestroyTexture(player_tex);
+        SDL_DestroyTexture(gold_tex);
         SDL_DestroyRenderer(rend);
         SDL_DestroyWindow(win);
         for (int i = 0; i < NUM_ENEMIES; i++)
             free(enemy_array[i]);
         free(enemy_array);
+        for (int i = 0; i < NUM_GOLD; i++)
+            free(gold_array[i]);
+        free(gold_array);
         TTF_Quit();
         return 0;
     }
@@ -84,15 +95,22 @@ int main(void)
     char username[15] = "";
     if (username_screen(username) == 1) {
         TTF_CloseFont(font);
-        SDL_DestroyTexture(hero_tex);
+        SDL_DestroyTexture(player_tex);
+        SDL_DestroyTexture(gold_tex);
         SDL_DestroyRenderer(rend);
         SDL_DestroyWindow(win);
         for (int i = 0; i < NUM_ENEMIES; i++)
             free(enemy_array[i]);
         free(enemy_array);
+        for (int i = 0; i < NUM_GOLD; i++)
+            free(gold_array[i]);
+        free(gold_array);
         TTF_Quit();
         return 0;
     }
+
+    char score_str[256] = "0";
+
     while (!close_requested) {
         // process events
         SDL_Event event;
@@ -100,12 +118,16 @@ int main(void)
             switch (event.type) {
                 case SDL_QUIT:
                     TTF_CloseFont(font);
-                    SDL_DestroyTexture(hero_tex);
+                    SDL_DestroyTexture(player_tex);
+                    SDL_DestroyTexture(gold_tex);
                     SDL_DestroyRenderer(rend);
                     SDL_DestroyWindow(win);
                     for (int i = 0; i < NUM_ENEMIES; i++)
                         free(enemy_array[i]);
                     free(enemy_array);
+                    for (int i = 0; i < NUM_GOLD; i++)
+                        free(gold_array[i]);
+                    free(gold_array);
                     TTF_Quit();
                     SDL_Quit();
                     return 0;
@@ -153,40 +175,54 @@ int main(void)
         }
 
         /* check player/wall collisions */
-        if (hero_rect.y <= 0) {
-            hero_rect.y = 0;
-            hero_y_vel = -hero_y_vel;
-        } else if (hero_rect.y >= WINDOW_HEIGHT - hero_rect.h) {
-            hero_rect.y = WINDOW_HEIGHT - hero_rect.h;
-            hero_y_vel = -hero_y_vel;
+        if (player_rect.y <= 0) {
+            player_rect.y = 0;
+            player_y_vel = -player_y_vel;
+        } else if (player_rect.y >= WINDOW_HEIGHT - player_rect.h) {
+            player_rect.y = WINDOW_HEIGHT - player_rect.h;
+            player_y_vel = -player_y_vel;
         }
-        if (hero_rect.x <= 0) {
-            hero_rect.x = 0;
-            hero_x_vel = -hero_x_vel;
-        } else if (hero_rect.x >= WINDOW_WIDTH - hero_rect.w) {
-            hero_rect.x = WINDOW_WIDTH - hero_rect.w;
-            hero_x_vel = -hero_x_vel;
+        if (player_rect.x <= 0) {
+            player_rect.x = 0;
+            player_x_vel = -player_x_vel;
+        } else if (player_rect.x >= WINDOW_WIDTH - player_rect.w) {
+            player_rect.x = WINDOW_WIDTH - player_rect.w;
+            player_x_vel = -player_x_vel;
         }
 
         /* change player velocity based on input */
-        hero_x_vel = hero_y_vel = 0;
-        if (move_up && !move_down) hero_y_vel = -SPEED;
-        else if (!move_up && move_down) hero_y_vel = SPEED;
+        player_x_vel = player_y_vel = 0;
+        if (move_up && !move_down) player_y_vel = -SPEED;
+        else if (!move_up && move_down) player_y_vel = SPEED;
 
-        if (move_right && !move_left) hero_x_vel = SPEED;
-        else if (!move_right && move_left) hero_x_vel = -SPEED;
+        if (move_right && !move_left) player_x_vel = SPEED;
+        else if (!move_right && move_left) player_x_vel = -SPEED;
 
-        hero_rect.x += hero_x_vel / 60;
-        hero_rect.y += hero_y_vel / 60;
+        player_rect.x += player_x_vel / 60;
+        player_rect.y += player_y_vel / 60;
+
+        score_int = check_gold_collisions(player_rect, gold_array, prev_score_int);
+        if (score_int > prev_score_int) {
+            sprintf(score_str, "%ld", score_int);
+            prev_score_int = score_int;
+            score_tex = make_texture_str(score_str);
+            score_rect = make_textbox(score_tex, 0, 0, 1, 0x0);
+        }
 
         SDL_RenderClear(rend);
+        SDL_RenderCopy(rend, score_tex, NULL, &score_rect);
+
+        for (int i = 0; i < NUM_GOLD; i++)
+            SDL_RenderCopy(rend, gold_tex, NULL, gold_array[i]);
+
+
         /* Check where player is in relation to the enemy, and change enemy velocity accordingly */
         for (int i = 0; i < NUM_ENEMIES; i++) {
-            if (enemy_array[i]->rect.x < hero_rect.x)
+            if (enemy_array[i]->rect.x < player_rect.x)
                 enemy_array[i]->x_vel = SPEED / 100;
             else
                 enemy_array[i]->x_vel = -SPEED / 100;
-            if (enemy_array[i]->rect.y < hero_rect.y)
+            if (enemy_array[i]->rect.y < player_rect.y)
                 enemy_array[i]->y_vel = SPEED / 100;
             else
                 enemy_array[i]->y_vel = -SPEED / 100;
@@ -202,7 +238,7 @@ int main(void)
             }
 
             /* check for enemy collision with player */
-            if (SDL_HasIntersection(&enemy_array[i]->rect, &hero_rect)) {
+            if (SDL_HasIntersection(&enemy_array[i]->rect, &player_rect)) {
                 enemy_array[i]->x_vel *= -1;
                 enemy_array[i]->y_vel *= -1;
             }
@@ -212,7 +248,7 @@ int main(void)
             SDL_RenderCopy(rend, enemy_tex, NULL, &enemy_array[i]->rect);
         }
 
-        SDL_RenderCopy(rend, hero_tex, NULL, &hero_rect);
+        SDL_RenderCopy(rend, player_tex, NULL, &player_rect);
         SDL_RenderPresent(rend);
 
         SDL_Delay(1000/60);
@@ -220,12 +256,16 @@ int main(void)
 
     if (leader_board_screen() == 1) {
         TTF_CloseFont(font);
-        SDL_DestroyTexture(hero_tex);
+        SDL_DestroyTexture(player_tex);
+        SDL_DestroyTexture(gold_tex);
         SDL_DestroyRenderer(rend);
         SDL_DestroyWindow(win);
         for (int i = 0; i < NUM_ENEMIES; i++)
             free(enemy_array[i]);
         free(enemy_array);
+        for (int i = 0; i < NUM_GOLD; i++)
+            free(gold_array[i]);
+        free(gold_array);
         TTF_Quit();
         SDL_Quit();
         return 0;
@@ -233,12 +273,16 @@ int main(void)
 
     // clean up resources before exiting
     TTF_CloseFont(font);
-    SDL_DestroyTexture(hero_tex);
+    SDL_DestroyTexture(player_tex);
+        SDL_DestroyTexture(gold_tex);
     SDL_DestroyRenderer(rend);
     SDL_DestroyWindow(win);
     for (int i = 0; i < NUM_ENEMIES; i++)
         free(enemy_array[i]);
     free(enemy_array);
+    for (int i = 0; i < NUM_GOLD; i++)
+        free(gold_array[i]);
+    free(gold_array);
     TTF_Quit();
     SDL_Quit();
     return 0;

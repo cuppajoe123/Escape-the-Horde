@@ -21,7 +21,18 @@ SDL_Rect **init_gold(SDL_Texture *gold_tex)
         gold_array[i]->x = rand() % WINDOW_WIDTH;
         gold_array[i]->y = rand() % WINDOW_HEIGHT;
     }
-    SDL_DestroyTexture(gold_tex);
 
     return gold_array;
+}
+
+int check_gold_collisions(SDL_Rect player, SDL_Rect **gold_array, int score)
+{
+    for (int i = 0; i < NUM_GOLD; i++) {
+        if (SDL_HasIntersection(&player, gold_array[i])) {
+            score += 10;
+            gold_array[i]->x = rand() % WINDOW_WIDTH;
+            gold_array[i]->y = rand() % WINDOW_HEIGHT;
+        }
+    }
+    return score;
 }
