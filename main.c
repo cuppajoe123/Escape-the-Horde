@@ -80,6 +80,7 @@ int main(void)
         TTF_CloseFont(font);
         SDL_DestroyTexture(player_tex);
         SDL_DestroyTexture(gold_tex);
+        SDL_DestroyTexture(score_tex);
         SDL_DestroyRenderer(rend);
         SDL_DestroyWindow(win);
         for (int i = 0; i < NUM_ENEMIES; i++)
@@ -97,6 +98,7 @@ int main(void)
         TTF_CloseFont(font);
         SDL_DestroyTexture(player_tex);
         SDL_DestroyTexture(gold_tex);
+        SDL_DestroyTexture(score_tex);
         SDL_DestroyRenderer(rend);
         SDL_DestroyWindow(win);
         for (int i = 0; i < NUM_ENEMIES; i++)
@@ -120,6 +122,7 @@ int main(void)
                     TTF_CloseFont(font);
                     SDL_DestroyTexture(player_tex);
                     SDL_DestroyTexture(gold_tex);
+                    SDL_DestroyTexture(score_tex);
                     SDL_DestroyRenderer(rend);
                     SDL_DestroyWindow(win);
                     for (int i = 0; i < NUM_ENEMIES; i++)
@@ -201,20 +204,20 @@ int main(void)
         player_rect.x += player_x_vel / 60;
         player_rect.y += player_y_vel / 60;
 
+        SDL_RenderClear(rend);
+
         score_int = check_gold_collisions(player_rect, gold_array, prev_score_int);
+        /* checks if score has changed */
         if (score_int > prev_score_int) {
             sprintf(score_str, "%ld", score_int);
             prev_score_int = score_int;
             score_tex = make_texture_str(score_str);
             score_rect = make_textbox(score_tex, 0, 0, 1, 0x0);
         }
-
-        SDL_RenderClear(rend);
         SDL_RenderCopy(rend, score_tex, NULL, &score_rect);
 
         for (int i = 0; i < NUM_GOLD; i++)
             SDL_RenderCopy(rend, gold_tex, NULL, gold_array[i]);
-
 
         /* Check where player is in relation to the enemy, and change enemy velocity accordingly */
         for (int i = 0; i < NUM_ENEMIES; i++) {
@@ -238,10 +241,8 @@ int main(void)
             }
 
             /* check for enemy collision with player */
-            if (SDL_HasIntersection(&enemy_array[i]->rect, &player_rect)) {
-                enemy_array[i]->x_vel *= -1;
-                enemy_array[i]->y_vel *= -1;
-            }
+            if (SDL_HasIntersection(&enemy_array[i]->rect, &player_rect))
+                goto end_game;
             enemy_array[i]->rect.x += enemy_array[i]->x_vel;
             enemy_array[i]->rect.y += enemy_array[i]->y_vel;
 
@@ -254,27 +255,18 @@ int main(void)
         SDL_Delay(1000/60);
     }
 
-    if (leader_board_screen() == 1) {
-        TTF_CloseFont(font);
-        SDL_DestroyTexture(player_tex);
-        SDL_DestroyTexture(gold_tex);
-        SDL_DestroyRenderer(rend);
-        SDL_DestroyWindow(win);
-        for (int i = 0; i < NUM_ENEMIES; i++)
-            free(enemy_array[i]);
-        free(enemy_array);
-        for (int i = 0; i < NUM_GOLD; i++)
-            free(gold_array[i]);
-        free(gold_array);
-        TTF_Quit();
-        SDL_Quit();
-        return 0;
-    }
 
+end_game:
+
+    save_user_data(score_str, username);
+
+    leader_board_screen();
+    
     // clean up resources before exiting
     TTF_CloseFont(font);
     SDL_DestroyTexture(player_tex);
-        SDL_DestroyTexture(gold_tex);
+    SDL_DestroyTexture(gold_tex);
+    SDL_DestroyTexture(score_tex);
     SDL_DestroyRenderer(rend);
     SDL_DestroyWindow(win);
     for (int i = 0; i < NUM_ENEMIES; i++)
