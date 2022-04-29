@@ -7,10 +7,10 @@ CC := gcc
 CFLAGS := `sdl2-config --libs --cflags` -ggdb3 -Og -g -Wall -lSDL2_image -lSDL2_ttf -lm 
 
 # add header files here
-HDRS := graphics.h leader_board.h
+HDRS := graphics.h leader_board.h gold.h
 
 # add source files here
-SRCS := main.c graphics.c leader_board.c
+SRCS := main.c graphics.c leader_board.c gold.c
 
 # generate names of object files
 OBJS := $(SRCS:.c=.o)

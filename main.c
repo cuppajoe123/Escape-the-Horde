@@ -1,3 +1,6 @@
+/* TODO: change hero* to player* */
+
+
 /*
  * This program was written using the SDL2 graphics library. All functions and data types beginning in SDL* are from the graphics library:
  * https://github.com/libsdl-org/SDL
@@ -11,6 +14,7 @@
 #include <stdbool.h>
 #include "graphics.h"
 #include "leader_board.h"
+#include "gold.h"
 
 struct enemy {
     SDL_Rect rect;
@@ -60,6 +64,9 @@ int main(void)
         enemy_array[i]->y_vel = SPEED / 100;
 
     }
+
+    SDL_Texture *gold_tex = make_texture_img("resources/gold.jpg");
+    SDL_Rect **gold_array = init_gold(gold_tex);
 
     // start screen loop
     if (start_screen() == 1) {
@@ -145,6 +152,7 @@ int main(void)
             }
         }
 
+        /* check player/wall collisions */
         if (hero_rect.y <= 0) {
             hero_rect.y = 0;
             hero_y_vel = -hero_y_vel;
@@ -160,6 +168,7 @@ int main(void)
             hero_x_vel = -hero_x_vel;
         }
 
+        /* change player velocity based on input */
         hero_x_vel = hero_y_vel = 0;
         if (move_up && !move_down) hero_y_vel = -SPEED;
         else if (!move_up && move_down) hero_y_vel = SPEED;
@@ -192,7 +201,7 @@ int main(void)
                 }
             }
 
-            /* check for collision with player */
+            /* check for enemy collision with player */
             if (SDL_HasIntersection(&enemy_array[i]->rect, &hero_rect)) {
                 enemy_array[i]->x_vel *= -1;
                 enemy_array[i]->y_vel *= -1;
