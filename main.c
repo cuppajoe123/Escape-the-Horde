@@ -182,25 +182,16 @@ int main(void)
             else
                 enemy_array[i]->y_vel = -SPEED / 100;
 
-            /*
-            for (int j = 0; j < NUM_ENEMIES; j++) {
-                if ((enemy_array[i]->rect.x >= enemy_array[j]->rect.x - enemy_array[j]->rect.w/2)
-                    && (enemy_array[i]->rect.x <= enemy_array[j]->rect.x + enemy_array[j]->rect.w/2))
-                    enemy_array[i]->x_vel *= -1;
-                if ((enemy_array[i]->rect.y >= enemy_array[j]->rect.y - enemy_array[j]->rect.h/2)
-                    && (enemy_array[i]->rect.y <= enemy_array[j]->rect.y + enemy_array[j]->rect.h/2))
-                    enemy_array[i]->y_vel *= -1;
-            }
-            */
-
-            /*
+            /* check for collisions between enemies */
             for (int j = 0; j < NUM_ENEMIES; j++) {
                 if (SDL_HasIntersection(&enemy_array[i]->rect, &enemy_array[j]->rect)) {
-                    enemy_array[i]->x_vel *= -1;
-                    enemy_array[i]->y_vel *= -1;
+                    enemy_array[i]->rect.x -= enemy_array[i]->x_vel;
+                    enemy_array[j]->rect.x += enemy_array[j]->x_vel;
+                    enemy_array[i]->rect.y -= enemy_array[i]->y_vel;
+                    enemy_array[j]->rect.y += enemy_array[j]->y_vel;
                 }
             }
-            */
+
             /* check for collision with player */
             if (SDL_HasIntersection(&enemy_array[i]->rect, &hero_rect)) {
                 enemy_array[i]->x_vel *= -1;
