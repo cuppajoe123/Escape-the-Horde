@@ -65,10 +65,10 @@ int main(void)
         SDL_QueryTexture(enemy_tex, NULL, NULL, &enemy_array[i]->rect.w, &enemy_array[i]->rect.h);
         enemy_array[i]->rect.w /= 18;
         enemy_array[i]->rect.h /= 18;
-        enemy_array[i]->rect.x = rand() % WINDOW_WIDTH;
-        enemy_array[i]->rect.y = rand() % WINDOW_HEIGHT;
-        enemy_array[i]->x_vel = SPEED / 100;
-        enemy_array[i]->y_vel = SPEED / 100;
+        enemy_array[i]->rect.x = 0;
+        enemy_array[i]->rect.y = 0;
+        enemy_array[i]->x_vel = ENEMY_SPEED;
+        enemy_array[i]->y_vel = ENEMY_SPEED;
 
     }
 
@@ -222,13 +222,13 @@ int main(void)
         /* Check where player is in relation to the enemy, and change enemy velocity accordingly */
         for (int i = 0; i < NUM_ENEMIES; i++) {
             if (enemy_array[i]->rect.x < player_rect.x)
-                enemy_array[i]->x_vel = SPEED / 100;
+                enemy_array[i]->x_vel = ENEMY_SPEED;
             else
-                enemy_array[i]->x_vel = -SPEED / 100;
+                enemy_array[i]->x_vel = -ENEMY_SPEED;
             if (enemy_array[i]->rect.y < player_rect.y)
-                enemy_array[i]->y_vel = SPEED / 100;
+                enemy_array[i]->y_vel = ENEMY_SPEED;
             else
-                enemy_array[i]->y_vel = -SPEED / 100;
+                enemy_array[i]->y_vel = -ENEMY_SPEED;
 
             /* check for collisions between enemies */
             for (int j = 0; j < NUM_ENEMIES; j++) {
