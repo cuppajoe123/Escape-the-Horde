@@ -9,7 +9,7 @@
 #define WINDOW_HEIGHT (1080)
 // speed in pixels/second
 #define SPEED (300)
-#define ENEMY_SPEED (SPEED / 110)
+#define ENEMY_SPEED (SPEED / 105)
 #define NUM_ENEMIES 100 
 #define CENTERED_X 0x01
 #define CENTERED_Y 0x02

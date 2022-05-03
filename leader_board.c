@@ -90,8 +90,7 @@ char **sort_user_data(char **user_data, int num_lines)
 {
     /* uses sscanf to parse out scores and then rearranges strings based on that */
     /* get num_lines from previous read_user_data */
-    int length = num_lines;
-    qsort(user_data, length, sizeof(char *), cmpscore);
+    qsort(user_data, num_lines, sizeof(char *), cmpscore);
 
     return user_data;
 }

@@ -27,7 +27,7 @@ int init_graphics(void)
     font = TTF_OpenFont("resources/FiraCode-Regular.ttf", 20);
 
     // create a window
-    win = SDL_CreateWindow("Pong: Hard Mode!",
+    win = SDL_CreateWindow("Escape the Horde!",
                                         SDL_WINDOWPOS_CENTERED,
                                         SDL_WINDOWPOS_CENTERED,
                                         WINDOW_WIDTH, WINDOW_HEIGHT, 0);
