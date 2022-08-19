@@ -140,7 +140,7 @@ SDL_Rect make_textbox(SDL_Texture *tex, int x, int y, float scale, int args)
 /* start_screen: main animation loop for rendering the start screen. When the player hits enter, the function returns, and the next screen can be rendered */
 int start_screen(void)
 {
-    SDL_Texture *title_texture = make_texture_str("Pong: Hard Mode");
+    SDL_Texture *title_texture = make_texture_str("Escape the Horde!");
     SDL_Rect title_rect = make_textbox(title_texture, 0, WINDOW_HEIGHT / 2, 2, CENTERED_X | CENTERED_Y);
 
     SDL_Texture *prompt_texture = make_texture_str("Press ENTER to start");
