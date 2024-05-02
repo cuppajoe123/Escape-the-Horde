@@ -1,4 +1,6 @@
 #include "graphics.h"
+#include <errno.h>
+#include <string.h>
 #include "leader_board.h"
 
 /* save_user_data: concatenates score and username, then appends to the data file */
@@ -64,7 +66,10 @@ char **read_user_data(char *path, int *num_lines)
     }
 
     for (int i = 0; i < *num_lines; i++)
-        getline(&user_data[i], &len, fp);
+        if (getline(&user_data[i], &len, fp) == -1) {
+          fprintf(stderr, "getline(): %s\n", strerror(errno));
+          exit(1);
+        }
 
     fclose(fp);
 
