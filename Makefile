@@ -4,7 +4,7 @@
 CC := gcc
 
 # set the compiler flags
-CFLAGS := `sdl2-config --libs --cflags` -ggdb3 -Og -g -Wall -lSDL2_image -lSDL2_ttf -lm 
+CFLAGS := `sdl2-config --libs --cflags` -ggdb3 -Og -g -Wall -lSDL2_image -lSDL2_ttf -lm
 
 # add header files here
 HDRS := graphics.h leader_board.h gold.h
@@ -24,10 +24,6 @@ all: $(EXEC)
 # recipe for building the final executable
 $(EXEC): $(OBJS) $(HDRS) Makefile
 	$(CC) -o $@ $(OBJS) $(CFLAGS)
-
-# recipe for building object files
-#$(OBJS): $(@:.o=.c) $(HDRS) Makefile
-#	$(CC) -o $@ $(@:.o=.c) -c $(CFLAGS)
 
 # recipe to clean the workspace
 clean:
