@@ -1,6 +1,3 @@
-/* TODO: change hero* to player* */
-
-
 /*
  * This program was written using the SDL2 graphics library. All functions and data types beginning in SDL* are from the graphics library:
  * https://github.com/libsdl-org/SDL
