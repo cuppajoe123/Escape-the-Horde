@@ -31,7 +31,7 @@ int main(void)
     // prev_score_int is used to check if the score_int changed in a given frame
     long score_int = 0;
     long prev_score_int = 0;
-    
+
     SDL_QueryTexture(player_tex, NULL, NULL, &player_rect.w, &player_rect.h);
     player_rect.w /= 10;
     player_rect.h /= 10;
@@ -42,7 +42,7 @@ int main(void)
 
     bool move_up, move_down, move_right, move_left;
     move_up = move_down = move_right = move_left = false;
-    
+
     bool close_requested = false;
 
     /* create scoreboard */
@@ -152,6 +152,7 @@ int main(void)
                         case SDL_SCANCODE_LEFT:
                             move_left = true;
                             break;
+                        default: break;
                     }
                     break;
                 case SDL_KEYUP:
@@ -172,8 +173,10 @@ int main(void)
                         case SDL_SCANCODE_LEFT:
                             move_left = false;
                             break;
+                        default: break;
                     }
                     break;
+                default: break;
             }
         }
 
@@ -261,7 +264,7 @@ end_game:
     save_user_data(score_str, username);
 
     leader_board_screen();
-    
+
     // clean up resources before exiting
     TTF_CloseFont(font);
     SDL_DestroyTexture(player_tex);

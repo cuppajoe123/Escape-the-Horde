@@ -1,3 +1,4 @@
+#include <SDL2/SDL_scancode.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -156,12 +157,11 @@ int start_screen(void)
                     /* returning 1 causes program to shut down */
                     return 1;
                 case SDL_KEYDOWN:
-                    switch (event.key.keysym.scancode) {
-                        case SDL_SCANCODE_RETURN:
-                            close_requested = true;
-                            break;
+                    if (event.key.keysym.scancode == SDL_SCANCODE_RETURN) {
+                        close_requested = true;
                     }
                     break;
+                default: break;
             }
         }
 
@@ -269,12 +269,11 @@ int leader_board_screen(void)
                     /* if the function returns 1, the entire program will shut down */
                     return 1;
                 case SDL_KEYDOWN:
-                    switch (event.key.keysym.scancode) {
-                        case SDL_SCANCODE_RETURN:
-                            close_requested = true;
-                            break;
+                    if (event.key.keysym.scancode == SDL_SCANCODE_RETURN) {
+                        close_requested = true;
                     }
                     break;
+                default: break;
             }
         }
 
